@@ -1,4 +1,4 @@
-# Fluent Renewed Plus
+# Fluent Renewed Plus Plus
 
 ![Fluent Renewed Title](Assets/darkmode.png#gh-dark-mode-only)
 ![Fluent Renewed Title](Assets/darkmode.png#gh-light-mode-only)
@@ -30,7 +30,7 @@ local Library = loadstring(game:HttpGetAsync("https://github.com/Asterpo/Fluent-
 
 ## Credits
 
-- [Asterpo](https://github.com/Asterpo/Fluent-Renewed-Plus) - The master mind behind Fluent Renewed Plus
+- [Asterpo](https://github.com/Asterpo/Fluent-Renewed-Plus-Plus) - The master mind behind Fluent Renewed Plus Plus
 - [Adiont](https://github.com/Adi0nt/Fluent-Renewed-Plus) - The original creator of Fluent Renewed Plus
 - [Master Oogway](https://github.com/ActualMasterOogway/Fluent-Renewed) - The master mind behind Fluent Renewed
 - [dawid](https://github.com/dawid-scripts/Fluent) - The master mind behind Fluent
