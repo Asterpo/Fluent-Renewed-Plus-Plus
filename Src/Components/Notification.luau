@@ -44,7 +44,9 @@ function Notification:New(Config)
 	Config.Sound.Parent = SoundService
 	Config.Sound.PlayOnRemove = true
 
-	NewNotification.AcrylicPaint = Acrylic.AcrylicPaint()
+	if require(Root).UseAcrylic then
+		NewNotification.AcrylicPaint = Acrylic.AcrylicPaint()
+	end
 
 	NewNotification.Title = New("TextLabel", {
 		Position = UDim2.new(0, 14, 0, 17),
@@ -135,7 +137,7 @@ function Notification:New(Config)
 		Size = UDim2.new(1, 0, 1, 0),
 		Position = UDim2.fromScale(1, 0),
 	}, {
-		NewNotification.AcrylicPaint.Frame,
+		NewNotification.AcrylicPaint and NewNotification.AcrylicPaint.Frame,
 		NewNotification.Title,
 		NewNotification.CloseButton,
 		NewNotification.LabelHolder,
