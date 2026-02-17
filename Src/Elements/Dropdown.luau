@@ -17,15 +17,7 @@ function Element:New(Idx, Config)
 	local Library = self.Library
 
 	local Dropdown = {
-		Values = (function()
-			local Idxes = {}
-
-			for i,v in next, Config.Values or {} do
-				Idxes[#Idxes + 1] = v
-			end
-
-			return Idxes
-		end)(),
+		Values = table.move(Config.Values or {}, 1, #(Config.Values or {}), 1, {}),
 		Value = Config.Default or Config.Value,
 		Multi = Config.Multi or false,
 		AutoDeselect = Config.AutoDeselect or false,
@@ -370,17 +362,9 @@ function Element:New(Idx, Config)
 			-- which is called every single time a dropdown is (re)built.
 			-- I have no idea how to optimize this so suggestions are welcome.
 
-			Creator.AddThemeObject(Button, {
-				BackgroundColor3 = "DropdownOption"
-			})
-
-			Creator.AddThemeObject(ButtonSelector, {
-				BackgroundColor3 = "Accent",
-			})
-
-			Creator.AddThemeObject(ButtonLabel, {
-				TextColor3 = "Text"
-			})
+			Button.BackgroundColor3 = Creator.GetThemeProperty("DropdownOption")
+			ButtonSelector.BackgroundColor3 = Creator.GetThemeProperty("Accent")
+			ButtonLabel.TextColor3 = Creator.GetThemeProperty("Text")
 
 			if Config.Multi then
 				Selected = Dropdown.Value[Value]
