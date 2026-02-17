@@ -4,7 +4,7 @@ local Flipper = require(Root.Packages.Flipper)
 local Signal = require(Root.Packages.Signal)
 
 local Creator = {
-	Registry = {},
+	Registry = setmetatable({}, { __mode = "k" }),
 	Signals = {},
 	TransparencyMotors = {},
 	DefaultProperties = {
@@ -105,9 +105,13 @@ function Creator.GetThemeProperty(Property)
 	return Themes["Dark"][Property]
 end
 
+local UpdateDepth = 0
 function Creator.UpdateTheme(RegistryIndex: Instance?)
-	if Creator.Theme.Updating then
+	UpdateDepth += 1
+	if UpdateDepth > 1 then
 		Creator.Theme.Updated:Wait()
+		UpdateDepth -= 1
+		return
 	end
 
 	Creator.Theme.Updating = true
@@ -153,6 +157,7 @@ function Creator.UpdateTheme(RegistryIndex: Instance?)
 	end
 
 	Creator.Theme.Updating = false
+	UpdateDepth -= 1
 	Creator.Theme.Updated:Fire()
 end
 
