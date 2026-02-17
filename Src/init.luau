@@ -60,6 +60,15 @@ local NotificationModule = require(Components.Notification)
 local SharedTable = shared or _G or (getgenv and getgenv()) or getfenv(1)
 local New = Creator.New
 
+local _CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+local function RandomString(length)
+	local t = table.create(length)
+	for i = 1, length do
+		t[i] = _CHARS:sub(math.random(1, #_CHARS), math.random(1, #_CHARS))
+	end
+	return table.concat(t)
+end
+
 local BaseContainer = New("ScreenGui", {
 	Name = "Fluent Renewed Plus Base GUI",
 })
@@ -341,16 +350,6 @@ function Library:Window(Config: {
 		},
 	})
 
-	local function RandomString(length)
-		local chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-		local result = ""
-		for i = 1, length do
-			local rand = math.random(1, #chars)
-			result = result .. chars:sub(rand, rand)
-		end
-		return result
-	end
-
 	BaseContainer.Name = RandomString(math.random(10, 20))
 
 	Library.CreatedWindow = Window
@@ -396,45 +395,29 @@ function Library:Destroy()
 			end
 		end
 
-		local info, tweenProps, doTween = TweenInfo.new(2 / 3, Enum.EasingStyle.Quint), {}, false
+		local TWEEN_PROPS_BY_CLASS = {
+			GuiObject =   { BackgroundTransparency = 1 },
+			TextLabel =   { TextTransparency = 1, TextStrokeTransparency = 1 },
+			TextBox =     { TextTransparency = 1, TextStrokeTransparency = 1 },
+			ImageLabel =  { ImageTransparency = 1 },
+			ImageButton = { ImageTransparency = 1 },
+			UIStroke =    { Transparency = 1 },
+			ScrollingFrame = { ScrollBarImageTransparency = 1 },
+		}
 
-		local function IsA(obj: Object, class: string)
-			local isClass = obj:IsA(class)
+		local info = TweenInfo.new(2 / 3, Enum.EasingStyle.Quint)
 
-			if isClass then
-				doTween = true
+		for _, v in next, Library.GUI:GetDescendants() do
+			local props = {}
+			local hasProps = false
+			for class, tProps in next, TWEEN_PROPS_BY_CLASS do
+				if v:IsA(class) then
+					for k, val in next, tProps do props[k] = val end
+					hasProps = true
+				end
 			end
-
-			return isClass
-		end
-
-		for i, v in next, Library.GUI:GetDescendants() do
-			table.clear(tweenProps)
-
-			if IsA(v, "GuiObject") then
-				tweenProps.BackgroundTransparency = 1
-			end
-
-			if IsA(v, "ScrollingFrame") then
-				tweenProps.ScrollBarImageTransparency = 1
-			end
-
-			if IsA(v, "TextLabel") or IsA(v, "TextBox") then
-				tweenProps.TextStrokeTransparency = 1
-				tweenProps.TextTransparency = 1
-			end
-
-			if IsA(v, "UIStroke") then
-				tweenProps.Transparency = 1
-			end
-
-			if IsA(v, "ImageLabel") or IsA(v, "ImageButton") then
-				tweenProps.ImageTransparency = 1
-			end
-
-			if doTween then
-				doTween = false
-				TweenService:Create(v, info, tweenProps):Play()
+			if hasProps then
+				TweenService:Create(v, info, props):Play()
 			end
 		end
 
