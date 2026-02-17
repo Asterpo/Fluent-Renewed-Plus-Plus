@@ -173,6 +173,8 @@ function TabModule:New(Title, Icon, Parent)
 end
 
 function TabModule:SelectTab(Tab)
+	if TabModule.SelectedTab == Tab then return end
+
 	local Window = TabModule.Window
 
 	TabModule.SelectedTab = Tab
