@@ -24,9 +24,9 @@ local Library = loadstring(game:HttpGetAsync("https://github.com/Asterpo/Fluent-
 
 ## 📜 Usage
 
-[Example Script the studio environment](https://github.com/Asterpo/Fluent-Renewed-Plus/blob/main/Example.client.luau)
+[Example Script the studio environment](https://github.com/Asterpo/Fluent-Renewed-Plus-Plus/blob/main/Example.client.luau)
 
-[Example Script for an exploit environment](https://github.com/Asterpo/Fluent-Renewed-Plus/blob/main/Example.lua)
+[Example Script for an exploit environment](https://github.com/Asterpo/Fluent-Renewed-Plus-Plus/blob/main/Example.lua)
 
 ## Credits
 
