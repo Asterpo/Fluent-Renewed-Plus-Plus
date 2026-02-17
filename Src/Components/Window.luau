@@ -10,6 +10,9 @@ local Components = script.Parent
 
 local Library = require(Root)
 
+local CurrentOS = Library.Utilities:GetOS()
+local IsMobile = CurrentOS == Enum.Platform.IOS or CurrentOS == Enum.Platform.Android
+
 local UserInputService = Library.Utilities:Clone(game:GetService("UserInputService"))
 local Mouse = Library.Utilities:Clone(game:GetService("Players")).LocalPlayer:GetMouse()
 local Camera = Library.Utilities:Clone(game:GetService("Workspace")).CurrentCamera
@@ -141,7 +144,7 @@ return function(Config)
 	})
 
 	local HideButtonProps = {
-		Visible = (Library.Utilities:GetOS() == Enum.Platform.IOS or Library.Utilities:GetOS() == Enum.Platform.Android),
+		Visible = IsMobile,
 		Size = Config.Mobile.Size,
 		BackgroundTransparency = 1,
 		Position = UDim2.new(1, -Config.Mobile.Size.X.Offset - 25, 0.5, -Config.Mobile.Size.Y.Offset / 2),
@@ -352,7 +355,7 @@ return function(Config)
 				Duration = 6
 			})
 		end
-		if (Library.Utilities:GetOS() == Enum.Platform.IOS or Library.Utilities:GetOS() == Enum.Platform.Android) then
+		if IsMobile then
 			local Icon = Config.Mobile.GetIcon(Window.Minimized)
 			if Icon and Icon.ImageRectSize then
 				Window.HideButton.Image = Icon.Image
@@ -410,7 +413,7 @@ return function(Config)
 		end
 	end)
 
-	if (Library.Utilities:GetOS() == Enum.Platform.IOS or Library.Utilities:GetOS() == Enum.Platform.Android) then
+	if IsMobile then
 		Creator.AddSignal(Window.HideButton.TouchTap, function()
 			Window.Minimized = not Window.Minimized
        			Window.Root.Visible = not Window.Minimized
