@@ -61,13 +61,24 @@ local SharedTable = shared or _G or (getgenv and getgenv()) or getfenv(1)
 local New = Creator.New
 
 local _CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+local _CHARS_LEN = #_CHARS
 local function RandomString(length)
 	local t = table.create(length)
 	for i = 1, length do
-		t[i] = _CHARS:sub(math.random(1, #_CHARS), math.random(1, #_CHARS))
+		t[i] = _CHARS:sub(math.random(1, _CHARS_LEN), math.random(1, _CHARS_LEN))
 	end
 	return table.concat(t)
 end
+
+local TWEEN_PROPS_BY_CLASS = {
+	GuiObject =   { BackgroundTransparency = 1 },
+	TextLabel =   { TextTransparency = 1, TextStrokeTransparency = 1 },
+	TextBox =     { TextTransparency = 1, TextStrokeTransparency = 1 },
+	ImageLabel =  { ImageTransparency = 1 },
+	ImageButton = { ImageTransparency = 1 },
+	UIStroke =    { Transparency = 1 },
+	ScrollingFrame = { ScrollBarImageTransparency = 1 },
+}
 
 local BaseContainer = New("ScreenGui", {
 	Name = "Fluent Renewed Plus Base GUI",
@@ -395,15 +406,6 @@ function Library:Destroy()
 			end
 		end
 
-		local TWEEN_PROPS_BY_CLASS = {
-			GuiObject =   { BackgroundTransparency = 1 },
-			TextLabel =   { TextTransparency = 1, TextStrokeTransparency = 1 },
-			TextBox =     { TextTransparency = 1, TextStrokeTransparency = 1 },
-			ImageLabel =  { ImageTransparency = 1 },
-			ImageButton = { ImageTransparency = 1 },
-			UIStroke =    { Transparency = 1 },
-			ScrollingFrame = { ScrollBarImageTransparency = 1 },
-		}
 
 		local info = TweenInfo.new(2 / 3, Enum.EasingStyle.Quint)
 
