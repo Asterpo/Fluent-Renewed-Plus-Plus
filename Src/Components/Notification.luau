@@ -132,16 +132,41 @@ function Notification:New(Config)
 		}),
 	})
 
+	NewNotification.Background = New("Frame", {
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+		BorderSizePixel = 0,
+		ThemeTag = {
+			BackgroundColor3 = "Element",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 8),
+		}),
+		New("UIStroke", {
+			Color = Color3.fromRGB(60, 60, 60),
+			Thickness = 1,
+			ThemeTag = {
+				Color = "ElementBorder",
+			},
+		}),
+	})
+
 	NewNotification.Root = New("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0, 1, 0),
 		Position = UDim2.fromScale(1, 0),
 	}, {
-		NewNotification.AcrylicPaint and NewNotification.AcrylicPaint.Frame,
+		NewNotification.Background,
 		NewNotification.Title,
 		NewNotification.CloseButton,
 		NewNotification.LabelHolder,
 	})
+
+	if NewNotification.AcrylicPaint then
+		NewNotification.AcrylicPaint.Frame.Parent = NewNotification.Root
+		NewNotification.Background.BackgroundTransparency = 1
+	end
 
 	if Config.Content == "" then
 		NewNotification.ContentLabel.Visible = false
