@@ -347,7 +347,7 @@ function Library:Window(Config: {
 			GetIcon = function(
 				IsMinimized: boolean
 			): { Image: string, ImageRectOffset: Vector2, ImageRectSize: Vector2 }
-				return Library.Utilities:GetIcon(IsMinimized and "phosphor-eye" or "phosphor-eye-slash")
+				return Library.Utilities:GetIcon(IsMinimized and "phosphor-eye" or "phosphor-eye-closed")
 			end,
 			Size = UDim2.fromOffset(30, 30),
 		},
