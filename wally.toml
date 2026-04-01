@@ -1,10 +1,10 @@
 [package]
-name = "asterpo/fluent-renewed-plus"
+name = "adi0nt/fluent-renewed-plus-plus"
 version = "1.0.1"
 license = "MIT"
-authors = ["Asterpo"]
+authors = ["Adi0nt"]
 registry = "https://github.com/UpliftGames/wally-index"
-repository = "https://github.com/Asterpo/fluent-renewed-plus"
+repository = "https://github.com/Adi0nt/fluent-renewed-plus-plus"
 realm = "shared"
 
 [dependencies]

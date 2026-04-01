@@ -173,8 +173,6 @@ function TabModule:New(Title, Icon, Parent)
 end
 
 function TabModule:SelectTab(Tab)
-	if TabModule.SelectedTab == Tab then return end
-
 	local Window = TabModule.Window
 
 	TabModule.SelectedTab = Tab
@@ -190,7 +188,7 @@ function TabModule:SelectTab(Tab)
 	Window.TabDisplay.Text = TabModule.Tabs[Tab].Name
 	Window.SelectorPosMotor:setGoal(Spring(TabModule:GetCurrentTabPos(), { frequency = 6 }))
 
-	task.spawn(function()
+	Creator.Spawn(function()
 		Window.ContainerHolder.Parent = Window.ContainerAnim
 		
 		Window.ContainerPosMotor:setGoal(Spring(15, { frequency = 10 }))

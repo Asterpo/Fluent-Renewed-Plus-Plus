@@ -94,7 +94,7 @@ return function(Parent, Acrylic)
 		end
 	end
 
-	task.spawn(Update)
+	Creator.Spawn(Update)
 
 	Creator.AddSignal(Textbox.Input:GetPropertyChangedSignal("Text"), Update)
 	Creator.AddSignal(Textbox.Input:GetPropertyChangedSignal("CursorPosition"), Update)
@@ -104,8 +104,8 @@ return function(Parent, Acrylic)
 		Textbox.Indicator.Size = UDim2.new(1, -2, 0, 2)
 		Textbox.Indicator.Position = UDim2.new(0, 1, 1, 0)
 		Textbox.Indicator.BackgroundTransparency = 0
-		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = Acrylic and "InputFocused" or "DialogHolder" })
-		Creator.OverrideTag(Textbox.Indicator, { BackgroundColor3 = "Accent" })
+		Creator.Spawn(Creator.OverrideTag, Textbox.Frame, { BackgroundColor3 = Acrylic and "InputFocused" or "DialogHolder" })
+		Creator.Spawn(Creator.OverrideTag, Textbox.Indicator, { BackgroundColor3 = "Accent" })
 	end)
 
 	Creator.AddSignal(Textbox.Input.FocusLost, function()
@@ -113,8 +113,8 @@ return function(Parent, Acrylic)
 		Textbox.Indicator.Size = UDim2.new(1, -4, 0, 1)
 		Textbox.Indicator.Position = UDim2.new(0, 2, 1, 0)
 		Textbox.Indicator.BackgroundTransparency = 0.5
-		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = Acrylic and "Input" or "DialogInput" })
-		Creator.OverrideTag(Textbox.Indicator, { BackgroundColor3 = Acrylic and "InputIndicator" or "DialogInputLine" })
+		Creator.Spawn(Creator.OverrideTag, Textbox.Frame, { BackgroundColor3 = Acrylic and "Input" or "DialogInput" })
+		Creator.Spawn(Creator.OverrideTag, Textbox.Indicator, { BackgroundColor3 = Acrylic and "InputIndicator" or "DialogInputLine" })
 	end)
 
 	return Textbox

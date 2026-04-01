@@ -54,7 +54,7 @@ local function createAcrylicBlur(distance)
 		local position = rbx.AbsolutePosition + Vector2.new(offset / 2, offset / 2)
 
 		updatePositions(size, position)
-		task.spawn(render)
+		Creator.Spawn(render)
 	end
 
 	local function renderOnChange()
@@ -66,7 +66,7 @@ local function createAcrylicBlur(distance)
 		cleanups[#cleanups + 1] = camera:GetPropertyChangedSignal("CFrame"):Connect(render)
 		cleanups[#cleanups + 1] = camera:GetPropertyChangedSignal("ViewportSize"):Connect(render)
 		cleanups[#cleanups + 1] = camera:GetPropertyChangedSignal("FieldOfView"):Connect(render)
-		task.spawn(render)
+		Creator.Spawn(render)
 	end
 
 	model.Destroying:Connect(function()

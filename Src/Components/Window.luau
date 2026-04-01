@@ -10,9 +10,6 @@ local Components = script.Parent
 
 local Library = require(Root)
 
-local CurrentOS = Library.Utilities:GetOS()
-local IsMobile = CurrentOS == Enum.Platform.IOS or CurrentOS == Enum.Platform.Android
-
 local UserInputService = Library.Utilities:Clone(game:GetService("UserInputService"))
 local Mouse = Library.Utilities:Clone(game:GetService("Players")).LocalPlayer:GetMouse()
 local Camera = Library.Utilities:Clone(game:GetService("Workspace")).CurrentCamera
@@ -143,22 +140,16 @@ return function(Config)
 		ResizeStartFrame,
 	})
 
-	local HideButtonProps = {
-		Visible = IsMobile,
+	Window.HideButton = New("ImageButton", {
+		Visible = (Library.Utilities:GetOS() == Enum.Platform.IOS or Library.Utilities:GetOS() == Enum.Platform.Android),
 		Size = Config.Mobile.Size,
 		BackgroundTransparency = 1,
 		Position = UDim2.new(1, -Config.Mobile.Size.X.Offset - 25, 0.5, -Config.Mobile.Size.Y.Offset / 2),
 		Parent = Config.Parent,
-	}
-
-	local IconData = Config.Mobile.GetIcon(false)
-	if IconData and IconData.ImageRectSize then
-		HideButtonProps.Image = IconData.Image
-		HideButtonProps.ImageRectOffset = IconData.ImageRectOffset
-		HideButtonProps.ImageRectSize = IconData.ImageRectSize
-	end
-
-	Window.HideButton = New("ImageButton", HideButtonProps)
+		Image = Config.Mobile.GetIcon(false).Image,
+		ImageRectOffset = Config.Mobile.GetIcon(false).ImageRectOffset,
+		ImageRectSize = Config.Mobile.GetIcon(false).ImageRectSize
+	})
 
 	Window.TitleBar = require(script.Parent.TitleBar)({
 		Title = Config.Title,
@@ -355,13 +346,11 @@ return function(Config)
 				Duration = 6
 			})
 		end
-		if IsMobile then
+		if (Library.Utilities:GetOS() == Enum.Platform.IOS or Library.Utilities:GetOS() == Enum.Platform.Android) then
 			local Icon = Config.Mobile.GetIcon(Window.Minimized)
-			if Icon and Icon.ImageRectSize then
-				Window.HideButton.Image = Icon.Image
-				Window.HideButton.ImageRectOffset = Icon.ImageRectOffset
-				Window.HideButton.ImageRectSize = Icon.ImageRectSize
-			end
+			Window.HideButton.Image = Icon.Image
+			Window.HideButton.ImageRectOffset = Icon.ImageRectOffset
+			Window.HideButton.ImageRectSize = Icon.ImageRectSiz
 		end
 		Window.PostMinimized:Fire(tick(), Window.Root.Visible)
 	end
@@ -413,16 +402,14 @@ return function(Config)
 		end
 	end)
 
-	if IsMobile then
+	if (Library.Utilities:GetOS() == Enum.Platform.IOS or Library.Utilities:GetOS() == Enum.Platform.Android) then
 		Creator.AddSignal(Window.HideButton.TouchTap, function()
 			Window.Minimized = not Window.Minimized
        			Window.Root.Visible = not Window.Minimized
 			local Icon = Config.Mobile.GetIcon(Window.Minimized)
-			if Icon and Icon.ImageRectSize then
-				Window.HideButton.Image = Icon.Image
-				Window.HideButton.ImageRectOffset = Icon.ImageRectOffset
-				Window.HideButton.ImageRectSize = Icon.ImageRectSize
-			end
+			Window.HideButton.Image = Icon.Image
+			Window.HideButton.ImageRectOffset = Icon.ImageRectOffset
+			Window.HideButton.ImageRectSize = Icon.ImageRectSize
 		end)
 	else
 		Creator.AddSignal(Window.HideButton.MouseButton1Click, function()

@@ -98,7 +98,7 @@ function Element:New(Idx, Config)
 	return setmetatable(Input, {
 		__newindex =  function(self, index, newvalue)
 			if index == "Value" then
-				task.spawn(Input.SetValue, Input, newvalue)
+				Creator.Spawn(Input.SetValue, Input, newvalue)
 			end
 			rawset(self, index, newvalue)
 		end

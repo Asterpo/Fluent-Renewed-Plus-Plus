@@ -16,12 +16,20 @@ Element.__type = "Dropdown"
 function Element:New(Idx, Config)
 	local Library = self.Library
 
-	local src = Config.Values or {}
 	local Dropdown = {
-		Values = table.move(src, 1, #src, 1, table.create(#src)),
+		Values = (function()
+			local Idxes = {}
+
+			for i, v in next, Config.Values or {} do
+				Idxes[#Idxes + 1] = v
+			end
+
+			return Idxes
+		end)(),
 		Value = Config.Default or Config.Value,
 		Multi = Config.Multi or false,
 		AutoDeselect = Config.AutoDeselect or false,
+		AutoRefresh = Config.AutoRefresh or false,
 		Searchable = Config.Searchable or false,
 		FocusSearch = Config.FocusSearch or false,
 		SearchPlaceholder = Config.SearchPlaceholder or "Search...",
@@ -33,7 +41,7 @@ function Element:New(Idx, Config)
 		Opened = false,
 		Type = "Dropdown",
 		Callback = Config.Callback or function() end,
-		Changed = Config.Changed or function() end
+		Changed = Config.Changed or function() end,
 	}
 
 	local DropdownFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, false)
@@ -67,7 +75,7 @@ function Element:New(Idx, Config)
 		BackgroundTransparency = 1,
 		ThemeTag = {
 			ImageColor3 = "SubText",
-		}
+		},
 	})
 
 	local DropdownInner = New("TextButton", {
@@ -77,8 +85,8 @@ function Element:New(Idx, Config)
 		BackgroundTransparency = 0.9,
 		Parent = DropdownFrame.Frame,
 		ThemeTag = {
-			BackgroundColor3 = "DropdownFrame"
-		}
+			BackgroundColor3 = "DropdownFrame",
+		},
 	}, {
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 5),
@@ -159,7 +167,7 @@ function Element:New(Idx, Config)
 		AnchorPoint = Vector2.new(0, 0.5),
 		ThemeTag = {
 			BackgroundColor3 = "Accent",
-		}
+		},
 	}, {
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 2),
@@ -178,8 +186,8 @@ function Element:New(Idx, Config)
 		Position = UDim2.fromOffset(10, 0),
 		Name = "ButtonLabel",
 		ThemeTag = {
-			TextColor3 = "Text"
-		}
+			TextColor3 = "Text",
+		},
 	}) :: TextLabel
 
 	local Button_BuildList = New("TextButton", {
@@ -188,14 +196,14 @@ function Element:New(Idx, Config)
 		ZIndex = 23,
 		Text = "",
 		ThemeTag = {
-			BackgroundColor3 = "DropdownOption"
-		}
+			BackgroundColor3 = "DropdownOption",
+		},
 	}, {
 		ButtonSelector_BuildList,
 		ButtonLabel_BuildList,
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 6),
-		})
+		}),
 	}) :: TextButton
 
 	local DropdownHolderCanvas = New("Frame", {
@@ -229,7 +237,8 @@ function Element:New(Idx, Config)
 		local Subtract = Dropdown.Searchable and 42 or 0
 		local Add = Dropdown.Searchable and 35 or 0
 
-		DropdownHolderCanvas.Size = UDim2.fromOffset(ListSizeX, math.min(392 - Subtract, DropdownListLayout.AbsoluteContentSize.Y + 10 + Add))
+		DropdownHolderCanvas.Size =
+			UDim2.fromOffset(ListSizeX, math.min(392 - Subtract, DropdownListLayout.AbsoluteContentSize.Y + 10 + Add))
 	end
 
 	local function RecalculateCanvasSize()
@@ -251,16 +260,15 @@ function Element:New(Idx, Config)
 		Dropdown.Opened = true
 		ScrollFrame.ScrollingEnabled = false
 		DropdownHolderCanvas.Visible = true
-		DropdownHolderFrame:TweenSize(
-			UDim2.fromScale(1, 1),
-			Enum.EasingDirection.Out,
-			Enum.EasingStyle.Quart,
-			.2
-		)
+		DropdownHolderFrame:TweenSize(UDim2.fromScale(1, 1), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2)
+
+		if Dropdown.AutoRefresh then
+			RepopulateDropdownList()
+		end
 
 		if Dropdown.Searchable then
 			SearchBox.Text = ""
-			
+
 			if Dropdown.FocusSearch then
 				SearchBox:CaptureFocus()
 			end
@@ -340,16 +348,13 @@ function Element:New(Idx, Config)
 			Element:Destroy()
 		end
 
-		local Count = 0
-
 		for Idx, Value in next, Values do
-			Count += 1
 
-			if Count % 30 == 0 then
-				task.wait()
-			end
-
-			if Dropdown.Searchable and SearchBox.Text ~= "" and not string.lower(Dropdown.Displayer(Value)):match(string.lower(SearchBox.Text)) then
+			if
+				Dropdown.Searchable
+				and SearchBox.Text ~= ""
+				and not string.lower(Dropdown.Displayer(Value)):match(string.lower(SearchBox.Text))
+			then
 				continue
 			end
 
@@ -359,13 +364,21 @@ function Element:New(Idx, Config)
 			local Button = Button_BuildList:Clone()
 			local ButtonSelector, ButtonLabel = Button:WaitForChild("Frame", 3), Button:WaitForChild("ButtonLabel", 3)
 
-			Button.BackgroundColor3 = Creator.GetThemeProperty("DropdownOption")
-			ButtonSelector.BackgroundColor3 = Creator.GetThemeProperty("Accent")
-			ButtonLabel.TextColor3 = Creator.GetThemeProperty("Text")
+			-- AddThemeObject causes some small stuttering, the reason for that is because of 'Creator.UpdateTheme'
+			-- which is called every single time a dropdown is (re)built.
+			-- I have no idea how to optimize this so suggestions are welcome.
 
-			Creator.Registry[Button]        = { Object = Button,        Properties = { BackgroundColor3 = "DropdownOption" } }
-			Creator.Registry[ButtonSelector]= { Object = ButtonSelector,Properties = { BackgroundColor3 = "Accent" } }
-			Creator.Registry[ButtonLabel]   = { Object = ButtonLabel,   Properties = { TextColor3 = "Text" } }
+			Creator.Spawn(Creator.AddThemeObject, Button, {
+				BackgroundColor3 = "DropdownOption",
+			})
+
+			Creator.Spawn(Creator.AddThemeObject, ButtonSelector, {
+				BackgroundColor3 = "Accent",
+			})
+
+			Creator.Spawn(Creator.AddThemeObject, ButtonLabel, {
+				TextColor3 = "Text",
+			})
 
 			if Config.Multi then
 				Selected = Dropdown.Value[Value]
@@ -568,12 +581,12 @@ function Element:New(Idx, Config)
 	return setmetatable(Dropdown, {
 		__newindex = function(self, index, newvalue)
 			if index == "Value" then
-				task.spawn(Dropdown.SetValue, Dropdown, newvalue)
+				Creator.Spawn(Dropdown.SetValue, Dropdown, newvalue)
 			elseif index == "Values" or index == "List" then
-				task.spawn(Dropdown.SetValues, Dropdown, newvalue)
+				Creator.Spawn(Dropdown.SetValues, Dropdown, newvalue)
 			end
 			rawset(self, index, newvalue)
-		end
+		end,
 	})
 end
 

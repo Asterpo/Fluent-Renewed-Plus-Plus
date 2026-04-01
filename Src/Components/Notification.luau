@@ -44,9 +44,7 @@ function Notification:New(Config)
 	Config.Sound.Parent = SoundService
 	Config.Sound.PlayOnRemove = true
 
-	if require(Root).UseAcrylic then
-		NewNotification.AcrylicPaint = Acrylic.AcrylicPaint()
-	end
+	NewNotification.AcrylicPaint = Acrylic.AcrylicPaint()
 
 	NewNotification.Title = New("TextLabel", {
 		Position = UDim2.new(0, 14, 0, 17),
@@ -132,40 +130,16 @@ function Notification:New(Config)
 		}),
 	})
 
-	-- Fallback background used when Acrylic is disabled
-	NewNotification.Background = New("Frame", {
-		Size = UDim2.new(1, 0, 1, 0),
-		BorderSizePixel = 0,
-		BackgroundTransparency = NewNotification.AcrylicPaint and 1 or 0,
-		ThemeTag = {
-			BackgroundColor3 = "AcrylicMain",
-		},
-	}, {
-		New("UICorner", {
-			CornerRadius = UDim.new(0, 8),
-		}),
-		New("UIStroke", {
-			Thickness = 1,
-			ThemeTag = {
-				Color = "AcrylicBorder",
-			},
-		}),
-	})
-
 	NewNotification.Root = New("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0, 1, 0),
 		Position = UDim2.fromScale(1, 0),
 	}, {
-		NewNotification.Background,
+		NewNotification.AcrylicPaint.Frame,
 		NewNotification.Title,
 		NewNotification.CloseButton,
 		NewNotification.LabelHolder,
 	})
-
-	if NewNotification.AcrylicPaint then
-		NewNotification.AcrylicPaint.Frame.Parent = NewNotification.Root
-	end
 
 	if Config.Content == "" then
 		NewNotification.ContentLabel.Visible = false
@@ -220,7 +194,7 @@ function Notification:New(Config)
 	function NewNotification:Close()
 		if not NewNotification.Closed then
 			NewNotification.Closed = true
-			task.spawn(function()
+			Creator.Spawn(function()
 				RootMotor:setGoal({
 					Scale = Spring(1, { frequency = 5 }),
 					Offset = Spring(60, { frequency = 5 }),
