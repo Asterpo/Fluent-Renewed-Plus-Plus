@@ -60,6 +60,7 @@ local NotificationModule = require(Components.Notification)
 local SharedTable = shared or _G or (getgenv and getgenv()) or getfenv(1)
 local New = Creator.New
 
+-- Security: random string generator for GUI name obfuscation
 local _CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 local _CHARS_LEN = #_CHARS
 local function RandomString(length)
@@ -70,21 +71,12 @@ local function RandomString(length)
 	return table.concat(t)
 end
 
-local TWEEN_PROPS_BY_CLASS = {
-	GuiObject =   { BackgroundTransparency = 1 },
-	TextLabel =   { TextTransparency = 1, TextStrokeTransparency = 1 },
-	TextBox =     { TextTransparency = 1, TextStrokeTransparency = 1 },
-	ImageLabel =  { ImageTransparency = 1 },
-	ImageButton = { ImageTransparency = 1 },
-	UIStroke =    { Transparency = 1 },
-	ScrollingFrame = { ScrollBarImageTransparency = 1 },
-}
-
 local BaseContainer = New("ScreenGui", {
-	Name = "Fluent Renewed Plus Base GUI",
+	Name = "Fluent Renewed Plus Plus Base GUI",
 })
 
--- Add protection
+-- Security: protect the ScreenGui from being detected/tampered with
+-- Supports protectgui (Synapse X) and syn.protect_gui, falls back to no-op
 local protectgui = protectgui or (syn and syn.protect_gui) or (function() end)
 pcall(protectgui, BaseContainer)
 
@@ -138,7 +130,7 @@ BaseContainer.Parent = (
 	end
 )()
 
-SharedTable.FluentRenewedPlus = SharedTable.FluentRenewedPlus or {}
+SharedTable.FluentRenewedPlusPlus = SharedTable.FluentRenewedPlusPlus or {}
 
 NotificationModule:Init(BaseContainer)
 
@@ -181,7 +173,7 @@ function Library:SafeCallback(Function, ...)
 		debug.traceback(`Library:SafeCallback expects type 'function' at Argument #1, got '{typeof(Function)}'`, 2)
 	)
 
-	task.spawn(function(...)
+	Creator.Spawn(function(...)
 		local Success, Event = pcall(Function, ...)
 
 		if not Success then
@@ -306,7 +298,7 @@ function Library:Window(Config: {
 	if not Config.Title then
 		local Success, Game_Info = pcall(MarketplaceService.GetProductInfoAsync, MarketplaceService, game.PlaceId)
 
-		Config.Title = Success and Game_Info.Name or "Fluent Renewed Plus"
+		Config.Title = Success and Game_Info.Name or "Fluent Renewed Plus Plus"
 	end
 
 	Config.MinSize = if typeof(Config.MinSize) == "Vector2" then Config.MinSize else Vector2.new(470, 380)
@@ -348,7 +340,7 @@ function Library:Window(Config: {
 		MinSize = Config.MinSize,
 
 		Title = Config.Title,
-		SubTitle = Config.SubTitle or "Made with Fluent Renewed Plus",
+		SubTitle = Config.SubTitle or "Made with Fluent Renewed Plus Plus",
 
 		TabWidth = Config.TabWidth or 160,
 		Mobile = Config.Mobile or {
@@ -361,6 +353,7 @@ function Library:Window(Config: {
 		},
 	})
 
+	-- Security: randomize GUI container name to resist detection
 	BaseContainer.Name = RandomString(math.random(10, 20))
 
 	Library.CreatedWindow = Window
@@ -406,20 +399,45 @@ function Library:Destroy()
 			end
 		end
 
+		local info, tweenProps, doTween = TweenInfo.new(2 / 3, Enum.EasingStyle.Quint), {}, false
 
-		local info = TweenInfo.new(2 / 3, Enum.EasingStyle.Quint)
+		local function IsA(obj: Object, class: string)
+			local isClass = obj:IsA(class)
 
-		for _, v in next, Library.GUI:GetDescendants() do
-			local props = {}
-			local hasProps = false
-			for class, tProps in next, TWEEN_PROPS_BY_CLASS do
-				if v:IsA(class) then
-					for k, val in next, tProps do props[k] = val end
-					hasProps = true
-				end
+			if isClass then
+				doTween = true
 			end
-			if hasProps then
-				TweenService:Create(v, info, props):Play()
+
+			return isClass
+		end
+
+		for i, v in next, Library.GUI:GetDescendants() do
+			table.clear(tweenProps)
+
+			if IsA(v, "GuiObject") then
+				tweenProps.BackgroundTransparency = 1
+			end
+
+			if IsA(v, "ScrollingFrame") then
+				tweenProps.ScrollBarImageTransparency = 1
+			end
+
+			if IsA(v, "TextLabel") or IsA(v, "TextBox") then
+				tweenProps.TextStrokeTransparency = 1
+				tweenProps.TextTransparency = 1
+			end
+
+			if IsA(v, "UIStroke") then
+				tweenProps.Transparency = 1
+			end
+
+			if IsA(v, "ImageLabel") or IsA(v, "ImageButton") then
+				tweenProps.ImageTransparency = 1
+			end
+
+			if doTween then
+				doTween = false
+				TweenService:Create(v, info, tweenProps):Play()
 			end
 		end
 

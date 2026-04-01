@@ -1,5 +1,6 @@
 local Root = script.Parent.Parent
 local Components = Root.Components
+local Creator = require(Root.Modules.Creator)
 
 local Element = {}
 Element.__index = Element
@@ -69,7 +70,7 @@ function Element:New(Idx, Config)
 	return setmetatable(Paragraph, {
 		__newindex =  function(self, index, newvalue)
 			if index == "Value" then
-				task.spawn(Paragraph.SetValue, Paragraph, newvalue)
+				Creator.Spawn(Paragraph.SetValue, Paragraph, newvalue)
 			end
 			rawset(self, index, newvalue)
 		end

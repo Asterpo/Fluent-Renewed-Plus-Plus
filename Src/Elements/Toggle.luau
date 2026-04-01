@@ -74,8 +74,8 @@ function Element:New(Idx, Config)
 
 		rawset(Toggle, "Value", Value)
 
-		Creator.OverrideTag(ToggleBorder, { Color = Toggle.Value and "Accent" or "ToggleSlider" })
-		Creator.OverrideTag(ToggleCircle, { ImageColor3 = Toggle.Value and "ToggleToggled" or "ToggleSlider" })
+		Creator.Spawn(Creator.OverrideTag, ToggleBorder, { Color = Toggle.Value and "Accent" or "ToggleSlider" })
+		Creator.Spawn(Creator.OverrideTag, ToggleCircle, { ImageColor3 = Toggle.Value and "ToggleToggled" or "ToggleSlider" })
 
 		ToggleCircle:TweenPosition(
 			UDim2.new(0, Toggle.Value and 19 or 2, 0.5, 0),
@@ -256,7 +256,7 @@ function Element:New(Idx, Config)
 					Picking = true
 					KeybindDisplayLabel.Text = "..."
 		
-					task.wait(0.2)
+					wait(0.2)
 		
 					UserInputService.InputBegan:Once(function(Input)
 						local Key
@@ -319,7 +319,7 @@ function Element:New(Idx, Config)
 			return setmetatable(Toggle.Keybind, {
 				__newindex =  function(self, index, newvalue)
 					if index == "Value" then
-						task.spawn(Keybind.SetValue, Keybind, newvalue)
+						Creator.Spawn(Keybind.SetValue, Keybind, newvalue)
 					end
 					rawset(self, index, newvalue)
 				end
@@ -336,7 +336,7 @@ function Element:New(Idx, Config)
 	return setmetatable(Toggle, {
 		__newindex =  function(self, index, newvalue)
 			if index == "Value" then
-				task.spawn(Toggle.SetValue, Toggle, newvalue)
+				Creator.Spawn(Toggle.SetValue, Toggle, newvalue)
 			end
 			rawset(self, index, newvalue)
 		end

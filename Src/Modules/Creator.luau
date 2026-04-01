@@ -4,8 +4,9 @@ local Flipper = require(Root.Packages.Flipper)
 local Signal = require(Root.Packages.Signal)
 
 local Creator = {
-	Registry = setmetatable({}, { __mode = "k" }),
+	Registry = {},
 	Signals = {},
+	Threads = {},
 	TransparencyMotors = {},
 	DefaultProperties = {
 		ScreenGui = {
@@ -67,16 +68,67 @@ local Creator = {
 			BackgroundColor3 = Color3.new(1, 1, 1),
 			BorderColor3 = Color3.new(0, 0, 0),
 			BorderSizePixel = 0,
-		}
+		},
 	},
 	Theme = {
-		Updated = Signal.new()
-	}
+		Updating = false,
+		Updated = Signal.new(),
+	},
 }
+
+local function ReusableThreadCall(Function, Thread: thread, ...)
+	Function(...)
+	table.insert(Creator.Threads, Thread)
+end
+
+local function ReusableThread()
+	while true do
+		ReusableThreadCall(coroutine.yield())
+	end
+end
 
 local function ApplyCustomProps(Object, Props: { [string]: any }?)
 	if typeof(Props) == "table" and Props.ThemeTag then
-		Creator.AddThemeObject(Object, Props.ThemeTag)
+		Creator.Spawn(Creator.AddThemeObject, Object, Props.ThemeTag)
+	end
+end
+
+function Creator.Spawn(Function, ...)
+	local length = table.maxn(Creator.Threads)
+	if length == 0 then
+		local thread = coroutine.create(ReusableThread)
+		coroutine.resume(thread)
+		return task.spawn(thread, Function, thread, ...)
+	else
+		local thread = Creator.Threads[length]
+		Creator.Threads[length] = nil -- Remove from free threads list.
+		return task.spawn(thread, Function, thread, ...)
+	end
+end
+
+function Creator.Defer(Function, ...)
+	local length = table.maxn(Creator.Threads)
+	if length == 0 then
+		local thread = coroutine.create(ReusableThread)
+		coroutine.resume(thread)
+		return task.defer(thread, Function, thread, ...)
+	else
+		local thread = Creator.Threads[length]
+		Creator.Threads[length] = nil -- Remove from free threads list.
+		return task.defer(thread, Function, thread, ...)
+	end
+end
+
+function Creator.Delay(Delay, Function, ...)
+	local length = table.maxn(Creator.Threads)
+	if length == 0 then
+		local thread = coroutine.create(ReusableThread)
+		coroutine.resume(thread)
+		return task.delay(Delay, thread, Function, thread, ...)
+	else
+		local thread = Creator.Threads[length]
+		Creator.Threads[length] = nil -- Remove from free threads list.
+		return task.delay(Delay, thread, Function, thread, ...)
 	end
 end
 
@@ -87,7 +139,7 @@ end
 function Creator.Disconnect()
 	for Idx = #Creator.Signals, 1, -1 do
 		local Connection = table.remove(Creator.Signals, Idx)
-		
+
 		if Connection then
 			Connection:Disconnect()
 		end
@@ -96,7 +148,7 @@ end
 
 function Creator.GetThemeProperty(Property)
 	local Theme = require(Root).Theme
-	
+
 	if Themes[Theme][Property] then
 		return Themes[Theme][Property]
 	end
@@ -104,65 +156,40 @@ function Creator.GetThemeProperty(Property)
 	return Themes["Dark"][Property]
 end
 
-local UpdateDepth = 0
 function Creator.UpdateTheme(RegistryIndex: Instance?)
-	UpdateDepth += 1
-	if UpdateDepth > 1 then
+	if Creator.Theme.Updating then
 		Creator.Theme.Updated:Wait()
-		UpdateDepth -= 1
-		
-		if typeof(RegistryIndex) == "Instance" then
-			Creator.UpdateTheme(RegistryIndex)
-		end
-		
-		return
 	end
 
-	local Count = 0
+	Creator.Theme.Updating = true
 
 	if typeof(RegistryIndex) == "Instance" and Creator.Registry[RegistryIndex] then
 		for Property, ColorIdx in next, Creator.Registry[RegistryIndex].Properties do
-			Count += 1
-
-			if Count % 135 == 0 then
-				task.wait()
-			end
-
-			RegistryIndex[Property] = Creator.GetThemeProperty(ColorIdx)
+			Creator.Spawn(function()
+				RegistryIndex[Property] = Creator.GetThemeProperty(ColorIdx)
+			end)
 		end
 	else
 		for _, Object in next, Creator.Registry do
-			Count += 1
-
-			if Count % 135 == 0 then
-				task.wait()
-			end
-
 			for Property, ColorIdx in next, Object.Properties do
-				Count += 1
-
-				if Count % 135 == 0 then
-					task.wait()
-				end
-
-				Object.Object[Property] = Creator.GetThemeProperty(ColorIdx)
+				Creator.Spawn(function()
+					Object.Object[Property] = Creator.GetThemeProperty(ColorIdx)
+				end)
 			end
 		end
-	end	
-
-	for Idx: number, Motor in next, Creator.TransparencyMotors do
-		if Idx % 135 == 0 then
-			task.wait()
-		end
-
-		Motor:setGoal(Flipper.Instant.new(Creator.GetThemeProperty("ElementTransparency")))
 	end
 
-	UpdateDepth -= 1
+	for Idx: number, Motor in next, Creator.TransparencyMotors do
+		Creator.Spawn(function()
+			Motor:setGoal(Flipper.Instant.new(Creator.GetThemeProperty("ElementTransparency")))
+		end)
+	end
+
+	Creator.Theme.Updating = false
 	Creator.Theme.Updated:Fire()
 end
 
-function Creator.AddThemeObject(Object: Instance, Properties:{ [string]: any })
+function Creator.AddThemeObject(Object: Instance, Properties: { [string]: any })
 	local Idx = #Creator.Registry + 1
 	local Data = {
 		Object = Object,
@@ -206,7 +233,13 @@ function Creator.New(Name, Properties: { [string]: any }?, Children: { [number]:
 	return Object
 end
 
-function Creator.SpringMotor(Initial: any, Instance: Object, Prop: string, IgnoreDialogCheck: boolean?, ResetOnThemeChange: boolean?)
+function Creator.SpringMotor(
+	Initial: any,
+	Instance: Object,
+	Prop: string,
+	IgnoreDialogCheck: boolean?,
+	ResetOnThemeChange: boolean?
+)
 	IgnoreDialogCheck = IgnoreDialogCheck or false
 	ResetOnThemeChange = ResetOnThemeChange or false
 	local Motor = Flipper.SingleMotor.new(Initial)

@@ -1,10 +1,10 @@
-local Library = loadstring(game:HttpGetAsync("https://github.com/Asterpo/Fluent-Renewed-Plus-Plus/releases/latest/download/Fluent.luau"))()
-local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Asterpo/Fluent-Renewed-Plus-Plus/master/Addons/SaveManager.luau"))()
-local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Asterpo/Fluent-Renewed-Plus-Plus/master/Addons/InterfaceManager.luau"))()
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
  
 local Window = Library:CreateWindow{
     Title = `Fluent {Library.Version}`,
-    SubTitle = "by Asterpo",
+    SubTitle = "by Actual Master Oogway",
     TabWidth = 160,
     Size = UDim2.fromOffset(830, 525),
     Resize = true, -- Resize this ^ Size according to a 1920x1080 screen, good for mobile users but may look weird on some devices
@@ -14,7 +14,7 @@ local Window = Library:CreateWindow{
     MinimizeKey = Enum.KeyCode.RightControl -- Used when theres no MinimizeKeybind
 }
 
--- Fluent Renewed Plus provides ALL 1544 Lucide 0.469.0 https://lucide.dev/icons/ Icons and ALL 9072 Phosphor 2.1.0 https://phosphoricons.com/ Icons for the tabs, icons are optional
+-- Fluent Renewed Plus Plus provides ALL 1544 Lucide 0.469.0 https://lucide.dev/icons/ Icons and ALL 9072 Phosphor 2.1.0 https://phosphoricons.com/ Icons for the tabs, icons are optional
 local Tabs = {
     Main = Window:CreateTab{
         Title = "Main",
