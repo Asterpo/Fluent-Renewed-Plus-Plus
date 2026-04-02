@@ -49,7 +49,7 @@ function Element:New(Idx, Config)
 		end
 
 		rawset(Input, "Value", Text)
-		Box.Text = Text
+		Box.Text = tostring(Text or "")
 
 		if typeof(Input.Callback) == "function" then
 			Library:SafeCallback(Input.Callback, Input.Value)
